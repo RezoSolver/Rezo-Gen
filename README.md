@@ -31,12 +31,14 @@ This project is built for professional-grade automation, handling everything fro
 
 ### Setup
 1. Clone the repository
-2. Install dependencies:
+   ```bash
+   git clone https://github.com/RezoSolver/Rezo-Gen.git
+3. Install dependencies:
    ```bash
    pip install stealth_requests colorama pystyle
    ```
 
-3. Configure your keys in `/input/config.json`:
+4. Configure your keys in `/input/config.json`:
    ```json
    {
      "data": {
@@ -49,14 +51,14 @@ This project is built for professional-grade automation, handling everything fro
    }
    ```
 
-4. Add your proxies to `/input/proxies.txt` (format: `user:pass@host:port`).
+5. Add your proxies to `/input/proxies.txt` (format: `user:pass@host:port`).
 
 ## 📖 Usage
 
 Navigate to the generator directory and run:
 
 ```bash
-cd Gen
+cd Rezo-Gen
 python main.py
 ```
 
