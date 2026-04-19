@@ -1,0 +1,9 @@
+{
+    "data": {
+        "cybertemp_api_key": "",
+        "solver_api_key": ""
+    },
+    "verification": {
+        "enabled": true
+    }
+}
