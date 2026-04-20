@@ -546,7 +546,7 @@ def display_banner():
     System.Clear()
     banner = """
                        ⠀⠀⠀⠀⠀⠀⠀⠀⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⣶⡆
-                       ⠀⠀⠀⠀⠀⠀⠀⠀⠘⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇      ● https://discord.gg/g3Eqhn8wTb
+                       ⠀⠀⠀⠀⠀⠀⠀⠀⠘⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇      ● https://discord.gg/rezo
                        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿⡿      ● https://rezotokens.mysellauth.com
                        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣶⣾⣿⣿⣿⣿⠟⠁      ● https://github.com/RezoSolver
                        ⠀⠀⠀⠀⠀⠀⠀⠀⣠⣿⣿⣿⠿⠿⠿⣿⣿⣿⡄      ● https://huzaif.online
