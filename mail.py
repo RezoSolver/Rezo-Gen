@@ -7,7 +7,7 @@ from urllib.parse import unquote
 class CybertempMailApi:
     BASE_URL = "https://api.cybertemp.xyz"
     DOMAINS = [
-        "hotelplazer.fr",
+        "lazerbade.fr",
     ]
     
     def __init__(self, api_key: str = None, logger=None):
