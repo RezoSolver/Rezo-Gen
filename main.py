@@ -486,7 +486,6 @@ def reg(email, username, password, proxy=None, current_num=1):
     # Start background gateway onliner — stays connected during entire verification flow
     onliner = BackgroundOnliner(auth_token)
     onliner.start()
-    Log.status("Token onliner started (background WS)")
 
     if not verification_enabled:
         pre_verify_status = check_token_status(session)
