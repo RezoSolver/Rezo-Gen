@@ -1,3 +1,4 @@
+# cybertemp is flagged rn, if its not working then host your own mail
 import time
 import requests
 import random
@@ -7,7 +8,7 @@ from urllib.parse import unquote
 class CybertempMailApi:
     BASE_URL = "https://api.cybertemp.xyz"
     DOMAINS = [
-        "lazerbade.fr",
+        "picturehostel.store",
     ]
     
     def __init__(self, api_key: str = None, logger=None):
