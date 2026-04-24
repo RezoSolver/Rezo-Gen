@@ -1,3 +1,5 @@
 stealth_requests
 colorama
 pystyle
+websocket-client
+requests
