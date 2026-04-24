@@ -10,6 +10,7 @@ import string
 import threading
 import time
 import uuid
+import websocket
 import ctypes
 from datetime import datetime
 from urllib.parse import urlparse
@@ -140,7 +141,7 @@ class Log:
 
     @staticmethod
     def captcha_failed():
-        Log._log("[-] CAPTCHA", "Failed to solve or blocked by anti-bot measures", Fore.RED)
+        Log._log("[-] CAPTCHA", "Failed to solve", Fore.RED)
         with stats_lock:
             stats['captcha_failed'] += 1
             stats['total'] += 1
@@ -163,15 +164,19 @@ class Log:
         with stats_lock:
             stats['verified'] += 1
 
-CHROME_VERSION = 131
+CHROME_VERSION = 124
 USER_AGENT = f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{CHROME_VERSION}.0.0.0 Safari/537.36"
 
-def get_build_number():
+def get_build_number(proxy=None):
     try:
-        page = requests.get("https://discord.com/app").text
+        sess = StealthSession()
+        if proxy:
+            proxy_url = f"http://{proxy}" if "://" not in proxy else proxy
+            sess.proxies = {"http": proxy_url, "https": proxy_url}
+        page = sess.get("https://discord.com/app").text
         assets = re.findall(r'src="/assets/([^"]+)"', page)
         for asset in reversed(assets):
-            js = requests.get(f"https://discord.com/assets/{asset}").text
+            js = sess.get(f"https://discord.com/assets/{asset}").text
             if "buildNumber:" in js:
                 return int(js.split('buildNumber:"')[1].split('"')[0]) 
     except Exception:
@@ -216,7 +221,7 @@ def get_fingerprint(session, dcfduid, sdcfduid):
         "accept-encoding": "gzip, deflate, br",
         "accept-language": "en-US,en;q=0.9",
         "cookie": f"__dcfduid={dcfduid}; __sdcfduid={sdcfduid};",
-        "sec-ch-ua": f'"Chromium";v="{CHROME_VERSION}", "Not-A.Brand";v="24", "Google Chrome";v="{CHROME_VERSION}"',
+        "sec-ch-ua": f'"Chromium";v="{CHROME_VERSION}", "Google Chrome";v="{CHROME_VERSION}", "Not-A.Brand";v="99"',
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": '"Windows"',
         "sec-fetch-dest": "document",
@@ -239,7 +244,7 @@ def build_headers(fingerprint, super_props):
         "origin": "https://discord.com",
         "referer": "https://discord.com/",
         "priority": "u=1, i",
-        "sec-ch-ua": f'"Chromium";v="{CHROME_VERSION}", "Not-A.Brand";v="24", "Google Chrome";v="{CHROME_VERSION}"',
+        "sec-ch-ua": f'"Chromium";v="{CHROME_VERSION}", "Google Chrome";v="{CHROME_VERSION}", "Not-A.Brand";v="99"',
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": '"Windows"',
         "sec-fetch-dest": "empty",
@@ -283,6 +288,61 @@ def save_account(email, password, token, token_status):
     with open(filename, "a", encoding="utf-8") as f:
         f.write(f"{email}:{password}:{token}\n")
 
+class BackgroundOnliner:
+    """Keeps a token online via Discord gateway in a background thread."""
+    def __init__(self, token):
+        self.token = token
+        self._stop = threading.Event()
+        self._thread = None
+
+    def start(self):
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def stop(self):
+        self._stop.set()
+
+    def _run(self):
+        try:
+            ws = websocket.WebSocket()
+            ws.settimeout(10)
+            ws.connect("wss://gateway.discord.gg/?v=9&encoding=json")
+            hello = json.loads(ws.recv())
+            heartbeat_interval = hello["d"]["heartbeat_interval"] / 1000
+
+            identify = {
+                "op": 2,
+                "d": {
+                    "token": self.token,
+                    "properties": {"$os": "Windows"},
+                },
+            }
+            ws.send(json.dumps(identify))
+
+            # Wait for READY
+            ready = False
+            for _ in range(10):
+                resp = json.loads(ws.recv())
+                if resp.get("t") == "READY":
+                    ready = True
+                    break
+                if resp.get("op") == 9:  # Invalid session
+                    ws.close()
+                    return
+
+            if not ready:
+                ws.close()
+                return
+
+            # Stay online, send heartbeats until stopped
+            while not self._stop.is_set():
+                ws.send(json.dumps({"op": 1, "d": None}))
+                self._stop.wait(heartbeat_interval)
+
+            ws.close()
+        except Exception:
+            pass
+
 def solve(sitekey, rqdata, user_agent, proxy=None):
     solver_key = config.get("data", {}).get("solver_api_key", "")
     solver = Solver(
@@ -315,10 +375,31 @@ def reg(email, username, password, proxy=None, current_num=1):
         Log.error(f"fingerprint failed")
         return
 
-    build_num = get_build_number()
+    build_num = get_build_number(proxy)
     super_props = build_super_properties(build_num)
     headers = build_headers(fingerprint, super_props)
     session.headers.update(headers)
+
+    # Fake registration preflight (warms up session, mimics real user behavior)
+    fake_user = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(12))
+    fake_payload = {
+        "fingerprint": fingerprint,
+        "email": f"{fake_user}@outlook.com",
+        "username": fake_user,
+        "password": f"{fake_user}Ab1!@#",
+        "date_of_birth": "1997-02-01",
+        "consent": True,
+    }
+
+    try:
+        fake_res = session.post("https://discord.com/api/v9/auth/register", json=fake_payload)
+        fake_json = fake_res.json()
+        if fake_res.status_code == 429:
+            retry_after = fake_json.get("retry_after", 60)
+            Log.waiting(f"rate limited, waiting {retry_after:.0f}s...")
+            time.sleep(retry_after + 1)
+    except Exception:
+        pass
 
     register_payload = {
         "fingerprint": fingerprint,
@@ -378,9 +459,20 @@ def reg(email, username, password, proxy=None, current_num=1):
                 time.sleep(1)
             else:
                 return
+    try:
+        raw_text = response.text
+        Log._log("[RESPONSE]", raw_text[:500], Fore.BLUE)
+    except Exception as e:
+        Log.error(f"Failed to read raw response: {e}")
+        
+    try:
+        res_data = response.json()
+    except Exception:
+        Log.error("Response is not valid JSON")
+        return
 
-    res_data = response.json()
     if 'token' not in res_data:
+        Log.error(f"no token, raw response: {res_data}")
         return
 
     auth_token = res_data['token']
@@ -391,22 +483,24 @@ def reg(email, username, password, proxy=None, current_num=1):
     session.headers.update({"authorization": auth_token})
     Log.generated(auth_token)
 
+    # Start background gateway onliner — stays connected during entire verification flow
+    onliner = BackgroundOnliner(auth_token)
+    onliner.start()
+    Log.status("Token onliner started (background WS)")
+
     if not verification_enabled:
         pre_verify_status = check_token_status(session)
         save_account(email, password, auth_token, pre_verify_status)
+        onliner.stop()
         return
 
     Log.waiting("waiting for verification email...")
-    
-    mail_api.headers.update({
-        "User-Agent": USER_AGENT,
-        "Accept": "*/*"
-    })
     
     verify_url = mail_api.get_verify_url(email, 3, 120, proxy)
     if not verify_url:
         token_status = check_token_status(session)
         save_account(email, password, auth_token, token_status)
+        onliner.stop()
         return
 
     try:
@@ -450,11 +544,13 @@ def reg(email, username, password, proxy=None, current_num=1):
         if not mail_token:
             token_status = check_token_status(session)
             save_account(email, password, auth_token, token_status)
+            onliner.stop()
             return
 
     except Exception:
         token_status = check_token_status(session)
         save_account(email, password, auth_token, token_status)
+        onliner.stop()
         return
 
     for h in ["x-captcha-key", "x-captcha-rqtoken", "x-captcha-session-id"]:
@@ -482,6 +578,7 @@ def reg(email, username, password, proxy=None, current_num=1):
             Log.captcha_failed()
             token_status = check_token_status(session)
             save_account(email, password, auth_token, token_status)
+            onliner.stop()
             return
 
         verify_solve_time = time.time() - verify_start
@@ -515,6 +612,7 @@ def reg(email, username, password, proxy=None, current_num=1):
     token_status = check_token_status(session)
     Log.status(f"Verified: {token_status.upper()}")
     save_account(email, password, auth_token, token_status)
+    onliner.stop()
 
 def stats_updater():
     while True:
@@ -582,6 +680,7 @@ if __name__ == "__main__":
         
         email = mail_api.create_account()
         if not email:
+            Log.error("emails are not available")
             semaphore.release()
             return
 
