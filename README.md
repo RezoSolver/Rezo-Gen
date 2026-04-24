@@ -35,7 +35,7 @@ This project is built for professional-grade automation, handling everything fro
    git clone https://github.com/RezoSolver/Rezo-Gen.git
 3. Install dependencies:
    ```bash
-   pip install stealth_requests colorama pystyle
+   pip install -r requirements
    ```
 
 4. Configure your keys in `/input/config.json`:
