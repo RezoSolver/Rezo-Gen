@@ -1,7 +1,9 @@
 {
     "data": {
-        "cybertemp_api_key": "",
         "solver_api_key": ""
+    },
+    "mail": {
+        "api_key": ""
     },
     "verification": {
         "enabled": true
