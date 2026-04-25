@@ -40,15 +40,17 @@ This project is built for professional-grade automation, handling everything fro
 
 4. Configure your keys in `/input/config.json`:
    ```json
-   {
-     "data": {
-       "solver_api_key": "YOUR_REZO_SOLVER_KEY",
-       "cybertemp_api_key": "YOUR_CYBERTEMP_KEY"
-     },
-     "verification": {
-       "enabled": true
-     }
-   }
+  {
+    "data": {
+      "solver_api_key": "YOUR_REZO_SOLVER_KEY"
+    },
+    "mail": {
+      "api_key": "YOUR_FREECUSTOM_EMAIL_API_KEY"
+    },
+    "verification": {
+      "enabled": true
+    }
+  }
    ```
 
 5. Add your proxies to `/input/proxies.txt` (format: `user:pass@host:port`).
@@ -71,7 +73,6 @@ Follow the prompts to set your thread count and watch the magic happen.
 
 - **`stealth_requests`**: Enhanced session handling for maximum anonymity and fingerprint consistency.
 - **`Rezo Solver`**: High-speed hCaptcha solving API.
-- **`CybertempMailApi`**: Custom API wrapper for lightning-fast email verification.
 - **`colorama` & `pystyle`**: Professional UI and logging.
 
 ## 🧩 Powered by Rezo Solver
