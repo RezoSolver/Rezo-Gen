@@ -19,7 +19,6 @@ This project is built for professional-grade automation, handling everything fro
 
 - **🔥 hCaptcha Bypass:** Native integration with Rezo Solver for lightning-fast hCaptcha solving.
 - **⚡ Multi-Threaded:** High-performance asynchronous generation with customizable thread counts.
-- **📧 Auto Email Verification:** Integrated with Cybertemp API for instant email verification and token extraction.
 - **🌐 Proxy Support:** Advanced proxy management with session stickiness and rotation support (supports `usr:pwd@ip:port` format).
 - **📊 Live Statistics:** Real-time console title updates and logging for success rates, captcha solve times, and token status.
 
@@ -52,7 +51,7 @@ This project is built for professional-grade automation, handling everything fro
     }
   }
   ```
-
+get mail api from here https://freecustom.email
 5. Add your proxies to `/input/proxies.txt` (format: `user:pass@host:port`).
 
 ## 📖 Usage
