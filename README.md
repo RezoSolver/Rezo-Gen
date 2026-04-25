@@ -39,7 +39,7 @@ This project is built for professional-grade automation, handling everything fro
    ```
 
 4. Configure your keys in `/input/config.json`:
-   ```json
+```json
   {
     "data": {
       "solver_api_key": "YOUR_REZO_SOLVER_KEY"
@@ -51,7 +51,7 @@ This project is built for professional-grade automation, handling everything fro
       "enabled": true
     }
   }
-   ```
+  ```
 
 5. Add your proxies to `/input/proxies.txt` (format: `user:pass@host:port`).
 
