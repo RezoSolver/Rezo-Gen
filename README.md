@@ -52,6 +52,7 @@ This project is built for professional-grade automation, handling everything fro
   }
   ```
 get mail api from here https://freecustom.email
+
 5. Add your proxies to `/input/proxies.txt` (format: `user:pass@host:port`).
 
 ## 📖 Usage
