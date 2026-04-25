@@ -15,7 +15,7 @@ import ctypes
 from datetime import datetime
 from urllib.parse import urlparse
 
-from mail import CybertempMailApi
+from mail import TempTfMailApi
 from solver_client import Solver
 
 config = {}
@@ -25,7 +25,7 @@ try:
 except Exception as e:
     print(f"Error loading config.json: {e}")
 
-mail_api = CybertempMailApi(api_key=config.get("data", {}).get("cybertemp_api_key"))
+mail_api = TempTfMailApi(logger=print, api_key=config.get("mail", {}).get("api_key"))
 verification_enabled = config.get("verification", {}).get("enabled", True)
 
 gen_count = 0
