@@ -81,7 +81,7 @@ Follow the prompts to set your thread count and watch the magic happen.
 
 ### 🔗 Official Links
 
-- **Rezo Solver**: [http://huzaif.online](http://huzaif.online)
+- **Rezo Solver**: [http://huzaif.online](http://huzaif.online) https://rezosolver.com
 - **Discord Server**: [https://discord.gg/g3Eqhn8wTb](https://discord.gg/g3Eqhn8wTb)
 - **Token Store**: [https://rezotokens.mysellauth.com/](https://rezotokens.mysellauth.com/)
 - **GitHub**: [https://github.com/RezoSolver](https://github.com/RezoSolver)
