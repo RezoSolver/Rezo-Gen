@@ -34,7 +34,7 @@ This project is built for professional-grade automation, handling everything fro
    git clone https://github.com/RezoSolver/Rezo-Gen.git
 3. Install dependencies:
    ```bash
-   pip install -r requirements
+   pip install -r requirements.txt
    ```
 
 4. Configure your keys in `/input/config.json`:
